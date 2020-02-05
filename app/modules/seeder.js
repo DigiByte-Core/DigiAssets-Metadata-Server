@@ -16,7 +16,7 @@ const Seeder = function (properties) {
 
 Seeder.prototype.seed = function () {
   // start marker for seeding can be given either from properties (file or environment variable) or last saved (as .txt file)
-  const marker = this.fromTorrentHash ? (this.fromTorrentHash + '.dam') : null
+  let marker = this.fromTorrentHash ? (this.fromTorrentHash + '.dam') : null
   if (!marker && fs.existsSync('./localdata/marker.txt')) {
     marker = fs.readFileSync('./localdata/marker.txt', 'utf8')
   }
@@ -34,7 +34,7 @@ Seeder.prototype.seed = function () {
           logger.info('marker =', keys[0])
           marker = done ? null : keys[keys.length - 1]
           async.eachOf(keys, (key, index, cb) => {
-            const torrentHash
+            let torrentHash;
             index += totalIndex
             async.waterfall([
               (cb) => {
