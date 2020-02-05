@@ -7,7 +7,7 @@
     "async": "^2.1.4",
     "aws-sdk": "^2.1.16",
     "casimircore": "^0.11.3",
-    "digiasset-metadata-handler": "^0.7.0",
+    "digiasset-metadata-handler": "^0.8.0",
     "graceful-fs": "^4.1.2",
     "jsonfile": "^2.0.0",
     "jwt-simple": "^0.3.1",

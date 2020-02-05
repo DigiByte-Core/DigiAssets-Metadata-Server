@@ -64,7 +64,11 @@ server.http_server.listen(server.port, (err) => {
   casimir.handler = new MetadataHandler(torrentProperties)
   if (properties.torrent.seed !== 'false') {
     const seeder = new Seeder(properties.torrent)
-    seeder.seed()
+    try {
+      seeder.seed();
+    } catch (e) {
+      logger.error(e);
+    }
   }
 })
 
