@@ -1,12 +1,12 @@
-var async = require('async')
-var fs = require('fs')
-var casimir = global.casimir
-var storage = casimir.storage
-var logger = casimir.logger
-var EventEmitter = require('events').EventEmitter
+const async = require('async')
+const fs = require('fs')
+const casimir = global.casimir
+const storage = casimir.storage
+const logger = casimir.logger
+const EventEmitter = require('events').EventEmitter
 EventEmitter.defaultMaxListeners = 0
 
-var Seeder = function (properties) {
+const Seeder = function (properties) {
   logger.info('Seeder: properties =', properties)
   this.seedBulkSize = parseInt(properties.seedBulkSize, 10)
   this.seedBulkIntervalInMs = parseInt(properties.seedBulkIntervalInMs, 10)
@@ -15,58 +15,51 @@ var Seeder = function (properties) {
 }
 
 Seeder.prototype.seed = function () {
-  var self = this
   // start marker for seeding can be given either from properties (file or environment variable) or last saved (as .txt file)
-  var marker = self.fromTorrentHash ? (self.fromTorrentHash + '.dam') : null
+  const marker = this.fromTorrentHash ? (this.fromTorrentHash + '.dam') : null
   if (!marker && fs.existsSync('./localdata/marker.txt')) {
     marker = fs.readFileSync('./localdata/marker.txt', 'utf8')
   }
-  async.forever(function (next) {
-    var done = false // did we iterate over all our storage keys
-    var totalIndex = 0
-    async.whilst(
-      function () { return !done },
-      function (callback) {
-        storage.listKeys({maxKeys: self.seedBulkSize, marker: marker}, function (err, res) {
+  async.forever((next) => {
+    let done = false // did we iterate over all our storage keys
+    let totalIndex = 0
+    async.whilst(() => { return !done },
+      (callback) => {
+        storage.listKeys({ maxKeys: this.seedBulkSize, marker: marker }, (err, res) => {
           if (err) return callback(err)
-          var keys = res.keys
+          const keys = res.keys
           done = res.done
           fs.writeFileSync('./localdata/marker.txt', keys[0])
           logger.info('Seeding keys ' + totalIndex + ' - ' + (totalIndex + res.keys.length))
           logger.info('marker =', keys[0])
           marker = done ? null : keys[keys.length - 1]
-          async.eachOf(keys, function (key, index, cb) {
-            var torrentHash
+          async.eachOf(keys, (key, index, cb) => {
+            const torrentHash
             index += totalIndex
             async.waterfall([
-              function (cb) {
+              (cb) => {
                 logger.debug('Getting file from S3, file name: ', key, ' - #', index)
                 storage.getFile(key, cb)
-              },
-              function (data, cb) {
+              }, (data, cb) => {
                 if (!data || !data.Body) {
                   return cb(new Error('get_file_from_s3: no data'))
                 }
                 logger.debug('Got file from S3, file name: ', key, ' - #', index)
                 data = JSON.parse(data.Body.toString())
-                self.handler.addMetadata(data, cb)
-              },
-              function (result, cb) {
+                this.handler.addMetadata(data, cb)
+              }, (result, cb) => {
                 torrentHash = result.torrentHash.toString('hex')
                 logger.debug('Added file to BitTorrent network, torrentHash: ', torrentHash, ' - #', index)
-                self.handler.shareMetadata(torrentHash, cb)
-              },
-              function (result, cb) {
+                this.handler.shareMetadata(torrentHash, cb)
+              }, (result, cb) => {
                 logger.debug('Started seeding, torrentHash: ', torrentHash, ' - #', index)
-                setTimeout(cb, self.seedBulkIntervalInMs)
-              },
-              function (cb) {
+                setTimeout(cb, this.seedBulkIntervalInMs)
+              }, (cb) => {
                 logger.debug('Remove torrent, torrentHash: ', torrentHash, ' - #', index)
                 // stop seeding current files (otherwise they'll keep open I\O connections and re-announce)
-                self.handler.removeMetadata(torrentHash, cb)
+                this.handler.removeMetadata(torrentHash, cb)
               }
-            ],
-            function (err) {
+            ], (err) => {
               if (err) {
                 logger.error('Error while seeding torrentHash: ', err)
                 return cb(err)
@@ -74,14 +67,12 @@ Seeder.prototype.seed = function () {
               logger.debug('Finished for torrentHash: ', torrentHash, ' - #', index)
               cb()
             })
-          },
-          function (err) {
-            totalIndex += self.seedBulkSize
+          }, (err) => {
+            totalIndex += this.seedBulkSize
             callback(err)
           })
         })
-      },
-      function (err) {
+      }, (err) => {
         if (err) {
           logger.error('Error received while seeding: ', err)
         } else {

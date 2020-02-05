@@ -1,7 +1,7 @@
-var AWS = require('aws-sdk')
-var mime = require('mime')
+const AWS = require('aws-sdk')
+const mime = require('mime')
 
-var S3Storage = function (properties) {
+const S3Storage = function (properties) {
   this.bucket = properties.bucket
   this.s3Client = new AWS.S3({
     accessKeyId: properties.accessKeyId,
@@ -14,9 +14,9 @@ S3Storage.prototype.listKeys = function (options, cb) {
     cb = options
     options = {}
   }
-  this.s3Client.listObjects({Bucket: this.bucket, Marker: options.marker, MaxKeys: options.maxKeys}, function (err, data) {
+  this.s3Client.listObjects({Bucket: this.bucket, Marker: options.marker, MaxKeys: options.maxKeys}, (err, data) => {
     if (err) return cb(err)
-    var result = {}
+    const result = {}
     result.done = !data.IsTruncated
     result.keys = data.Contents.map(obj => obj.Key)
     cb(null, result)

@@ -3,21 +3,21 @@ var handler = casimir.handler
 var logger = casimir.logger
 var storage = casimir.storage
 
-handler.on('error', function (err) {
+handler.on('error', (err) => {
   logger.error(err)
 })
 
-var getMetadata = function (req, res, next) {
-  storage.getFile(req.data.torrentHash + '.dam', function (err, data, t) {
+const getMetadata = function (req, res, next) {
+  storage.getFile(req.data.torrentHash + '.dam', (err, data, t) => {
     if (!err) return res.send(JSON.parse(data.Body.toString()))
     logger.error('getMetadata - err = ', err)
-    handler.getMetadata(req.data.torrentHash, req.data.sha2, function (err, metadata) {
+    handler.getMetadata(req.data.torrentHash, req.data.sha2, (err, metadata) => {
       if (err) {
         logger.error('getMetadata - err = ', err)
         return next(['Can\'t get metadata, probably there is no file', 400])
       }
       try {
-        var file = JSON.stringify(metadata)
+        const file = JSON.stringify(metadata)
         storage.saveFile(file, req.data.torrentHash + '.dam', function (err, data) {
           if (err) logger.error(err)
           else logger.info('Saved File')
@@ -31,12 +31,12 @@ var getMetadata = function (req, res, next) {
   })
 }
 
-var addMetadata = function (req, res, next) {
-  handler.addMetadata(req.data.metadata, function (err, result) {
+const addMetadata = function (req, res, next) {
+  handler.addMetadata(req.data.metadata, (err, result) => {
     if (err) return next(err)
     try {
-      var file = JSON.stringify(req.data.metadata)
-      storage.saveFile(file, result.torrentHash.toString('hex') + '.dam', function (err, data) {
+      const file = JSON.stringify(req.data.metadata)
+      storage.saveFile(file, result.torrentHash.toString('hex') + '.dam', (err, data) => {
         if (err) return next(err)
         return res.send(JSON.stringify({
           torrentHash: result.torrentHash.toString('hex'),
@@ -51,7 +51,7 @@ var addMetadata = function (req, res, next) {
 }
 
 var shareMetadata = function (req, res, next) {
-  handler.shareMetadata(req.data.torrentHash, function (err) {
+  handler.shareMetadata(req.data.torrentHash, (err) => {
     if (err) {
       logger.error('shareMetadata - err = ', err)
       return next(['Can\'t share metadata', 400])

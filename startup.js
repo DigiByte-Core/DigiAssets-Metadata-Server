@@ -1,12 +1,12 @@
-var casimir = global.casimir
-var server = casimir.server
-var properties = casimir.properties
-var logger = casimir.logger
-var MetadataHandler = require('digiasset-metadata-handler')
-var Seeder = require('./app/modules/seeder.js')
-var fs = require('graceful-fs')
+const casimir = global.casimir
+const server = casimir.server
+const properties = casimir.properties
+const logger = casimir.logger
+const MetadataHandler = require('digiasset-metadata-handler')
+const Seeder = require('./app/modules/seeder.js')
+const fs = require('graceful-fs')
 
-var torrentProperties = {
+const torrentProperties = {
   client: {
     // torrentPort: 13231,
     // dhtPort: 20000,
@@ -43,7 +43,7 @@ var torrentProperties = {
   }
 }
 
-var folders = []
+const folders = []
 folders.push(torrentProperties.folders.torrents)
 folders.push(torrentProperties.folders.data)
 folders.push('./localdata')
@@ -53,7 +53,7 @@ folders.forEach(function (dir) {
   }
 })
 
-server.http_server.listen(server.port, function (err) {
+server.http_server.listen(server.port, (err) => {
   if (err) {
     logger.info('Critical Error so killing server - ' + err)
     casimir.running = false
@@ -63,7 +63,7 @@ server.http_server.listen(server.port, function (err) {
   casimir.running = true
   casimir.handler = new MetadataHandler(torrentProperties)
   if (properties.torrent.seed !== 'false') {
-    var seeder = new Seeder(properties.torrent)
+    const seeder = new Seeder(properties.torrent)
     seeder.seed()
   }
 })

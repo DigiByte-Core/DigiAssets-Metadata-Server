@@ -1,7 +1,7 @@
-var jwt = require('jwt-simple')
-var path = require('path')
-var casimirCore = require('casimircore')()
-var properties = casimirCore.properties(path.join(__dirname, '/../config/'))
+const jwt = require('jwt-simple')
+const path = require('path')
+const casimirCore = require('casimircore')()
+const properties = casimirCore.properties(path.join(__dirname, '/../config/'))
 
 properties.torrent.seedBulkSize = process.env.SEED_BULK_SIZE || properties.torrent.seedBulkSize
 properties.torrent.seedBulkIntervalInMs = process.env.SEED_BULK_INTERVAL_MS || properties.torrent.seedBulkIntervalInMs
@@ -18,13 +18,13 @@ properties.MINIO.endPoint = process.env.endPoint || properties.MINIO.endPoint
 properties.MINIO.minioPort = process.env.minioPort || properties.MINIO.minioPort
 properties.MINIO.minioSSL = process.env.minioSSL || properties.MINIO.minioSSL
 
-var logSettings = {
+const logSettings = {
   level: properties.log && properties.log.level,
   logentries_api_key: properties.log && properties.log.logentries_api_key,
   log_dir: path.join(__dirname, '/../app/log')
 }
 
-var logger = global.logger = casimirCore.logger(logSettings)
+const logger = global.logger = casimirCore.logger(logSettings)
 // Log console.log to logger.debug
 console.log = logger.info
 // Log console.error to logger.error
@@ -33,18 +33,18 @@ console.error = logger.error
 console.warn = logger.warn
 
 // //////// Routes Files /////// //
-var routesDir = path.join(__dirname, '/../routes/')
+const routesDir = path.join(__dirname, '/../routes/')
 
-var Storage = require(path.join(__dirname, '/../app/modules/storage.js'))
-var storage = new Storage(properties)
+const Storage = require(path.join(__dirname, '/../app/modules/storage.js'))
+const storage = new Storage(properties)
 
-var verifyCallback = function (jwtToken, req, res, next) {
+const verifyCallback = function (jwtToken, req, res, next) {
   if (!properties.JWT.jwtTokenSecret) {
     return next()
   }
   try {
-    var decoded = jwt.decode(jwtToken, properties.JWT.jwtTokenSecret)
-    var expiration = Date.parse(decoded.exp)
+    const decoded = jwt.decode(jwtToken, properties.JWT.jwtTokenSecret)
+    const expiration = Date.parse(decoded.exp)
     if (expiration > Date.now()) {
       req.user = decoded.iss
     }
@@ -54,17 +54,17 @@ var verifyCallback = function (jwtToken, req, res, next) {
   next()
 }
 
-var accessCallback = function (req, res, next) {
+const accessCallback = function (req, res, next) {
   if (!properties.JWT.jwtTokenSecret) {
     return next() // if no JWT secret is provided, consider this a public end-point
   }
   next(['Unauthorized', 401])
 }
 
-var authentication = casimirCore.authentication(verifyCallback, accessCallback)
+const authentication = casimirCore.authentication(verifyCallback, accessCallback)
 
-var requestid
-var requestSettings
+let requestid
+let requestSettings
 if (properties.JWT.jwtTokenSecret) {
   requestSettings = {
     secret: properties.JWT.jwtTokenSecret,
@@ -89,7 +89,7 @@ properties.engine.view_folder = properties.engine.view_folder && path.join(__dir
 properties.engine.static_folder = properties.engine.static_folder && path.join(__dirname, '..', properties.engine.static_folder)
 
 // Set server and server port
-var server = casimirCore.server(properties)
+const server = casimirCore.server(properties)
 
 module.exports = {
   server: server,
