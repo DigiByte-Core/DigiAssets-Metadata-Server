@@ -1,7 +1,7 @@
 {
   "name": "digiasset-metadata-server",
   "description": "REST API server for fetching and sharing DigiAsset transactions metadata",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "main": "app.js",
   "dependencies": {
     "async": "^2.1.4",
